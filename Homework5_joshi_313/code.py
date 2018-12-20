@@ -1,14 +1,25 @@
-#importing required packages
-import numpy as np
+# importing required packages
 import csv
 import math
-import sklearn
-from sklearn import preprocessing
-import scipy
-from scipy import interp
 import random
+import argparse
+import numpy as np
+from scipy import interp
 from copy import deepcopy
+from sklearn.preprocessing import MinMaxScaler
 
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--k_twodim',
+    type=int,
+    help='Value of k for twodim dataset',
+    required=True)
+parser.add_argument(
+    '--k_wine',
+    type=int,
+    help='Value of k for wine dataset',
+    required=True)
+args = parser.parse_args()
 
 #reading CSV file - TwoDimHard
 with open('TwoDimHard.csv') as csvtrfile:
@@ -25,9 +36,9 @@ with open('TwoDimHard.csv') as csvtrfile:
     x2 = np.array(data['X.2']).astype(np.float)
     clust_orig = np.array(data['cluster']).astype(np.int)
 
-       
-#User input K
-k = int(input("please enter the value of k for TwoDimHard dataset:"))
+
+# k for twodim dataset
+k = args.k_twodim
 
 def dist_fun(a, b):
     return np.sqrt(np.sum((a-b)**2))
@@ -36,11 +47,11 @@ def dist_fun(a, b):
 rec = np.empty(shape=(400, 2))
 arr = [x1, x2]
 new_arr = zip(*arr)
-rec = np.array(new_arr)
+rec = np.array(list(new_arr))
 x_trans = rec.astype(np.float)
 
 #Normalizing continuous data attributes in range zero to one
-scaler = preprocessing.MinMaxScaler()
+scaler = MinMaxScaler()
 x = scaler.fit_transform(x_trans)
 
 # finding initial centroid
@@ -49,7 +60,7 @@ index = np.random.randint(x.shape[0], size=k)
 for i in range (0, k):
     c[i][0] = x1[index[i]]
     c[i][1] = x2[index[i]]
-    
+
 #storing prevoius values of centroids for computing errors
 c_prev = np.zeros(c.shape)
 clust_pred = np.zeros(400, dtype=int)
@@ -84,7 +95,7 @@ for i in range(0, 400):
     list_twodim[i][1] = clust_pred[i]
 
 #writing to csv file
-with open('code5_joshi_313_twodim_results.csv', 'wb') as myfile:
+with open('twodim_results.csv', 'w') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     wr.writerow(heading_list)
     wr.writerows(list_twodim)
@@ -114,38 +125,28 @@ with open('wine.csv') as csvtrfile:
     alc = np.array(data['alcohol']).astype(np.float)
     clust_orig_wine = np.array(data['quality']).astype(np.int)
 
-    
-#User input K
-k = int(input("please enter the value of k for wine dataset:"))
+
+# value of k for wine dataset
+k = args.k_wine
 
 #Putting all the attributes into a 2D array where each row represents a record in the dataset
 rec = np.empty(shape=(1599, 11))
 arr = [fx, vol, citric, resid, chl, free, tot, den, ph, sulph, alc]
 new_arr = zip(*arr)
-rec = np.array(new_arr)
+rec = np.array(list(new_arr))
 wine_trans = rec.astype(np.float)
-#print wine
+
 
 #Normalizing continuous data attributes in range zero to one
-scaler_wine = preprocessing.MinMaxScaler()
+scaler_wine = MinMaxScaler()
 wine = scaler_wine.fit_transform(wine_trans)
 
 #finding initial centroid
 c_wine = np.empty([k, 11])
-#ran_wine = random.sample(x, k)
 index = np.random.randint(wine.shape[0], size=k)
 for i in range (0, k):
-    c_wine[i][0] = wine[index[i]][0]
-    c_wine[i][1] = wine[index[i]][1]
-    c_wine[i][2] = wine[index[i]][2]
-    c_wine[i][3] = wine[index[i]][3]
-    c_wine[i][4] = wine[index[i]][4]
-    c_wine[i][5] = wine[index[i]][5]
-    c_wine[i][6] = wine[index[i]][6]
-    c_wine[i][7] = wine[index[i]][7]
-    c_wine[i][8] = wine[index[i]][8]
-    c_wine[i][9] = wine[index[i]][9]
-    c_wine[i][10] = wine[index[i]][10]
+    for j in range(0, 11):
+        c_wine[i][j] = wine[index[i]][j]
 
 #storing previous value of centroids for computing errors
 c_wine_prev = np.zeros(c_wine.shape)
@@ -178,7 +179,7 @@ for i in range(0, 1599):
     list_wine[i][1] = clust_pred_wine[i]
 
 #writing to csv file
-with open('code5_joshi_313_wine_results.csv', 'wb') as myfile:
+with open('wine_results.csv', 'w') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     wr.writerow(heading_list)
     wr.writerows(list_wine)
