@@ -1,14 +1,12 @@
 #importing required packages
-import numpy as np
 import csv
 import math
 import collections
-from collections import Counter
+import numpy as np
 from itertools import groupby
-import sklearn
+from collections import Counter
 from sklearn.metrics import confusion_matrix, roc_curve, auc
 from sklearn.neighbors import KNeighborsClassifier
-import matplotlib.pyplot as plt
 
 #setting value of k
 k = 8
@@ -40,7 +38,7 @@ with open('income_tr.csv') as csvtrfile:
     class_attr = data['class']
 
     #Filling out missing values with the most frequent value of the attribute
-    #Occupation - Filling missing values with 'Adm-Clerical'    
+    #Occupation - Filling missing values with 'Adm-Clerical'
     occuptn = np.array(data['occupation'])
     occupation_list = collections.Counter(occuptn)
     occupation_sorted = occupation_list.most_common()
@@ -71,7 +69,7 @@ with open('income_tr.csv') as csvtrfile:
             country[b] = country_sorted[0][0]
         b += 1
 
-    
+
 
 #reading test dataset from CSV
 with open('income_te.csv') as csvtefile:
@@ -100,7 +98,7 @@ with open('income_te.csv') as csvtefile:
     class_attr_te = data_te['class']
 
     #Filling out missing values with the most frequent value of the attribute
-    #Occupation - Filling missing values with 'Adm-Clerical'    
+    #Occupation - Filling missing values with 'Adm-Clerical'
     occuptn_te = np.array(data_te['occupation'])
     occupation_list_te = collections.Counter(occuptn_te)
     occupation_sorted_te = occupation_list_te.most_common()
@@ -149,7 +147,7 @@ with open('income_te.csv') as csvtefile:
     min_wt = min(min(fnlwgt), min(fnlwgt_te))
     diff = max_wt - min_wt
     for i in range (0, 520):
-        fnlwgt[i] = (fnlwgt[i] - min_wt) / (diff)                
+        fnlwgt[i] = (fnlwgt[i] - min_wt) / (diff)
     for i in range (0, 288):
         fnlwgt_te[i] = (fnlwgt_te[i] - min_wt) / (diff)
 
@@ -161,8 +159,8 @@ with open('income_te.csv') as csvtefile:
     for i in range(0, 288):
         edu_te[i] = float((float(edu_te[i]) - 1) / len_edu)
 
-    #Capital Gain   
-    gain = [float(numeric_string) for numeric_string in data['capital_gain']]    
+    #Capital Gain
+    gain = [float(numeric_string) for numeric_string in data['capital_gain']]
     gain_te = [float(numeric_string) for numeric_string in data_te['capital_gain']]
     max_gain = max(max(gain), max(gain_te))
     min_gain = min(min(gain), min(gain_te))
@@ -202,32 +200,32 @@ with open('income_te.csv') as csvtefile:
     rec_cont = np.empty(shape=(520, 6))
     arr_cont = [age, fnlwgt, edu, gain, loss, hours]
     new_arr_cont = zip(*arr_cont)
-    rec_cont = np.array(new_arr_cont)
+    rec_cont = np.array(list(new_arr_cont))
 
     #one for nominal attributes - training dataset
     rec_nom = np.empty(shape=(520, 7))
     arr_nom = [workclass, m_status, occupation, rship, race, gender, country]
     new_arr_nom = zip(*arr_nom)
-    rec_nom = np.array(new_arr_nom)
+    rec_nom = np.array(list(new_arr_nom))
 
     #one for continuous attributes - test dataset
     rec_cont_te = np.empty(shape=(288, 6))
     arr_cont_te = [age_te, fnlwgt_te, edu_te, gain_te, loss_te, hours_te]
     new_arr_cont_te = zip(*arr_cont_te)
-    rec_cont_te = np.array(new_arr_cont_te)
+    rec_cont_te = np.array(list(new_arr_cont_te))
 
     #one for nominal attributes - test dataset
     rec_nom_te = np.empty(shape=(288, 7))
     arr_nom_te = [workclass_te, m_status_te, occupation_te, rship_te, race_te, gender_te, country_te]
     new_arr_nom_te = zip(*arr_nom_te)
-    rec_nom_te = np.array(new_arr_nom_te)
+    rec_nom_te = np.array(list(new_arr_nom_te))
 
     #Creating arrays for storing calculated proximities
     dist_euc = np.empty(shape=(288,520), dtype=float)
     dist_cos = np.empty(shape=(288,520), dtype=float)
 
     #implementing Eculidean Distance between rows of the data set
-    def dist_eucl(x, y, a, b):   
+    def dist_eucl(x, y, a, b):
         cont_sum = 0
         for i in range (0, 6):
             sqr = (x[i]-y[i]) * (x[i]-y[i])
@@ -237,7 +235,7 @@ with open('income_te.csv') as csvtefile:
             if (a[i] != b[i]):
                 nom_sum += 1
         return math.sqrt(nom_sum + cont_sum)
-            
+
     for i in range (0, 288):
         for j in range (0, 520):
                 dist_euc[i][j] = dist_eucl(rec_cont_te[i], rec_cont[j], rec_nom_te[i], rec_nom[j])
@@ -245,16 +243,17 @@ with open('income_te.csv') as csvtefile:
     #implementing Cosine Similarity between rows of the data set
     def dist_cosine(a, b):
         dot_product = np.dot(a, b)
-	norm_a = np.linalg.norm(a)
-	norm_b = np.linalg.norm(b)
-	return float(dot_product / (norm_a * norm_b))
-               
+        norm_a = np.linalg.norm(a)
+        norm_b = np.linalg.norm(b)
+
+        return float(dot_product / (norm_a * norm_b))
+
     for i in range (0, 288):
         for j in range (0, 520):
             #cosine for continuous attributes
             cosine_similarity = dist_cosine(rec_cont_te[i], rec_cont[j])
             delta_cont = 1
-        
+
             #workclass - nominal
             if (rec_nom_te[i][0] == rec_nom[j][0]):
                 s_workclass = 1
@@ -321,8 +320,8 @@ with open('income_te.csv') as csvtefile:
 
     #For confusion matrix
     posterior = np.empty([288], dtype=float)
-    class_pred_str = np.empty(shape=(288), dtype=object)   
-    
+    class_pred_str = np.empty(shape=(288), dtype=object)
+
     #Predicting class attribute for test dataset by assigning weihgt according to their distance
 
     #Eculidean
@@ -394,7 +393,7 @@ with open('income_te.csv') as csvtefile:
             list_final_cos[i][2] = '>50K'
             class_pred_cos[i] = '>50K'
         list_final_cos[i][3] = str(posterior_cos[i])
- 
+
     #preparing output for writing into a csv file
     heading_list = []
     heading_list.append('Record Number')
@@ -403,12 +402,12 @@ with open('income_te.csv') as csvtefile:
     heading_list.append('Pesterior Probability')
 
     #writing to csv file
-    with open('output_homework2_joshi_euc.csv', 'wb') as myfile:
+    with open('output_homework2_joshi_euc.csv', 'w') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(heading_list)
         wr.writerows(list_final_euc)
 
-    with open('output_homework2_joshi_cosine.csv', 'wb') as myfile:
+    with open('output_homework2_joshi_cosine.csv', 'w') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(heading_list)
         wr.writerows(list_final_euc)

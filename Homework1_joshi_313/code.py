@@ -52,7 +52,7 @@ with open('income_tr.csv') as csvfile:
     for i in range (0, 520):
         fnlwgt[i] = (fnlwgt[i] - min_wt) / (diff)
 
-    #Capital Gain    
+    #Capital Gain
     gain = [float(numeric_string) for numeric_string in data['capital_gain']]
     max_gain = max(gain)
     min_gain = min(gain)
@@ -78,7 +78,7 @@ with open('income_tr.csv') as csvfile:
 
 
     #Filling out missing values with the most frequent value of the attribute
-    #Occupation - Filling missing values with 'Adm-Clerical'    
+    #Occupation - Filling missing values with 'Adm-Clerical'
     occuptn = np.array(data['occupation'])
     occupation_list = collections.Counter(occuptn)
     occupation_sorted = occupation_list.most_common()
@@ -113,18 +113,18 @@ with open('income_tr.csv') as csvfile:
     rec = np.empty(shape=(520, 13))
     arr = [age, workclass, fnlwgt, edu, m_status, occupation, rship, race, gender, gain, loss, hours, country]
     new_arr = zip(*arr)
-    rec = np.array(new_arr)
-    
+    rec = np.array(list(new_arr))
+
     #Creating an array for storing calculated proximities
     dist = np.empty(shape=(520,520), dtype=float)
 
     #Calculating distinct values in the set of ordinal attributes for proximity calculation
     len_edu = len(set(edu))
-    
+
     #calculating proximity with general approach
     for i in range (0, 520):
         for j in range (0, 520):
-            #Distance between a record with itself is of no use so assiging a huge number to it
+            # Distance between a record with itself is of no use so assiging a huge number to it
             if(i == j):
                 dist[i][j] = 5000000
             else:
@@ -226,7 +226,7 @@ with open('income_tr.csv') as csvfile:
                 net_weight = weight_age + weight_workclass + weight_fnlwgt + weight_edu + weight_marital + weight_occupation + weight_rship + weight_race + weight_gender + weight_gain + weight_loss + weight_hours + weight_country
                 delta_total = delta_age + delta_workclass + delta_fnlwgt + delta_edu + delta_marital + delta_occupation + delta_rship + delta_race + delta_gender + delta_gain + delta_loss + delta_hours +delta_country
                 dist[i][j] = 1 - (net_weight / delta_total)
-                
+
     #preparing output for writing into a csv file
     heading_list = []
     for j in range (0, 2*k+1):
@@ -249,7 +249,7 @@ with open('income_tr.csv') as csvfile:
         else:
             heading_list.insert(j, str(j/2) + 'th Prox')
 
-                
+
     list_final = [[0 for j in range (2*k+1)] for i in range (520)]
     for i in range (0, 520):
         ind = dist[i].argsort()
@@ -266,7 +266,7 @@ with open('income_tr.csv') as csvfile:
             b += 2
 
     #writing to csv ile
-    with open('output_general_joshi_313.csv', 'wb') as myfile:
+    with open('output_general_joshi_313.csv', 'w') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(heading_list)
         wr.writerows(list_final)
@@ -276,24 +276,24 @@ with open('income_tr.csv') as csvfile:
         edu[i] = float((float(edu[i]) - 1) / len_edu)
 
     #updating the records with new values of normalized education values
-        
+
     #one for continuous attributes
     rec_cont = np.empty(shape=(520, 6))
     arr_cont = [age, fnlwgt, edu, gain, loss, hours]
     new_arr_cont = zip(*arr_cont)
-    rec_cont = np.array(new_arr_cont)
+    rec_cont = np.array(list(new_arr_cont))
 
     #one for nominal attributes
     rec_nom = np.empty(shape=(520, 7))
     arr_nom = [workclass, m_status, occupation, rship, race, gender, country]
     new_arr_nom = zip(*arr_nom)
-    rec_nom = np.array(new_arr_nom)
+    rec_nom = np.array(list(new_arr_nom))
 
     #Creating an array for storing calculated proximities
     dist_new = np.empty(shape=(520,520), dtype=float)
 
     #implementing Eculidean Distance between rows of the data set
-    def dist_fun(x,y, a, b):   
+    def dist_fun(x,y, a, b):
         cont_sum = 0
         for i in range (0, 6):
             sqr = (x[i]-y[i]) * (x[i]-y[i])
@@ -303,7 +303,7 @@ with open('income_tr.csv') as csvfile:
             if (a[i] != b[i]):
                 nom_sum += 1
         return math.sqrt(nom_sum + cont_sum)
-            
+
     for i in range (0, 520):
         for j in range (0, 520):
             if (i == j):
@@ -328,11 +328,11 @@ with open('income_tr.csv') as csvfile:
             b += 2
 
     #writing to csv file
-    with open('output_eucld_joshi_313.csv', 'wb') as myfile:
+    with open('output_eucld_joshi_313.csv', 'w') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(heading_list)
         wr.writerows(list_final_new)
-            
+
 
 
 
